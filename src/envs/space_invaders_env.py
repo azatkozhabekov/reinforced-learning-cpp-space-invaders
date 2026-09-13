@@ -1,40 +1,38 @@
 import subprocess
 import time
+import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
+import config
 
 
 class SpaceInvadersEnv(gym.Env):
     def __init__(self):
         super().__init__()
 
-        # 1. Пространство действий (0: влево, 1: вправо, 2: выстрел, 3: ничего)
+        # 4 действия: Влево, Вправо, Выстрел, Простой
         self.action_space = spaces.Discrete(4)
 
-        # 2. Пример пространства наблюдений (подстройте под свой формат вывода)
-        self.observation_space = spaces.Box(low=0, high=255, shape=(20, 30), dtype=int)
+        # Игровое поле в виде матрицы символов/чисел
+        self.observation_space = spaces.Box(
+            low=0,
+            high=255,
+            shape=(config.GRID_HEIGHT, config.GRID_WIDTH),
+            dtype=np.uint8
+        )
 
         self.process = None
+        self.current_score = 0
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
-        # Если старый процесс игры еще запущен — завершаем его
         if self.process is not None:
             self.process.terminate()
             self.process.wait()
 
-        # 🚀 КОМАНДА ЗАПУСКА WSL И ИГРЫ
-        # wsl.exe автоматически выполняет переход в папку и запуск бинарника
-        wsl_cmd = [
-            "wsl",
-            "bash", "-c",
-            "cd /mnt/c/C/PCC/MySpaceInvaders/build && ./SpaceInvaders --play"
-        ]
-
-        # Запускаем игру в фоновом процессе с перенаправлением ввода/вывода (stdin/stdout)
         self.process = subprocess.Popen(
-            wsl_cmd,
+            config.WSL_COMMAND,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -42,41 +40,62 @@ class SpaceInvadersEnv(gym.Env):
             bufsize=1
         )
 
-        # Даем игре полсекунды на инициализацию
-        time.sleep(0.5)
+        time.sleep(0.2)
+        self.current_score = 0
 
-        # Считываем первое состояние игры
-        observation = self._get_observation()
-        info = {}
-        return observation, info
+        obs = self._get_observation()
+        return obs, {}
 
     def step(self, action):
-        # 1. Отправляем действие в WSL (в stdin C++ программы)
-        # Например, отправляем цифру действия и перенос строки: "0\n"
+        if self.process.poll() is not None:
+            return np.zeros((config.GRID_HEIGHT, config.GRID_WIDTH), dtype=np.uint8), 0.0, True, False, {}
+
+        # 1. Отправляем действие в C++ через stdin
         self.process.stdin.write(f"{action}\n")
         self.process.stdin.flush()
 
-        # 2. Считываем новое состояние, награду и конец игры из stdout C++ программы
-        observation = self._get_observation()
-        reward = self._get_reward()
-        terminated = self._check_if_terminal()
-        truncated = False
-        info = {}
+        # 2. Получаем обновленные данные из stdout
+        obs = self._get_observation()
+        new_score, terminated = self._read_game_status()
 
-        return observation, reward, terminated, truncated, info
+        # 3. Награда за получение очков (Максимизация счета)
+        score_diff = new_score - self.current_score
+        self.current_score = new_score
+
+        # За выбитые очки даём положительный Reward, за смерть — штраф
+        reward = float(score_diff)
+        if terminated:
+            reward -= 100.0  # Штраф за законченную попытку
+
+        return obs, reward, terminated, False, {"score": self.current_score}
 
     def _get_observation(self):
-        # ЗДЕСЬ ВЫ СЧИТЫВАЕТЕ ДАННЫЕ ИЗ `self.process.stdout.readline()`
-        # И преобразуете их в массив/матрицу для нейросети
-        pass
+        # Ожидается, что C++ программа выводит матрицу (например, 20 строк)
+        # Если вы пока не настроили вывод кадра — возвращаем пустую матрицу
+        matrix = np.zeros((config.GRID_HEIGHT, config.GRID_WIDTH), dtype=np.uint8)
+        try:
+            # Чтение кадра из stdout процесса C++
+            # Пример парсинга строк:
+            # for i in range(config.GRID_HEIGHT):
+            #     line = self.process.stdout.readline().strip()
+            #     matrix[i] = [int(x) for x in line.split()]
+            pass
+        except Exception:
+            pass
+        return matrix
 
-    def _get_reward(self):
-        # Логика получения награды из вывода программы
-        return 0.0
-
-    def _check_if_terminal(self):
-        # Проверка, закончилась ли игра (проигрыш/победа)
-        return False
+    def _read_game_status(self):
+        # Ожидается чтение счета и флага окончания игры из C++ программы
+        # Формат вывода в C++: "SCORE: 150 GAME_OVER: 0"
+        score = self.current_score
+        game_over = False
+        try:
+            # line = self.process.stdout.readline().strip()
+            # score, game_over = parse(line)
+            pass
+        except Exception:
+            pass
+        return score, game_over
 
     def close(self):
         if self.process is not None:
