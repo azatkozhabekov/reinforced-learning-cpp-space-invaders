@@ -1,6 +1,6 @@
 import sys
 from src.agent.train import train
-from src.agent.evaluate import test_best_model
+from src.agent.evaluate import evaluate as test_best_model
 
 if __name__ == "__main__":
     print("=== Space Invaders RL Agent ===")

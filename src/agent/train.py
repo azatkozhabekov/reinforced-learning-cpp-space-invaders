@@ -1,38 +1,27 @@
 import os
 from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import CheckpointCallback
 from src.envs.space_invaders_env import SpaceInvadersEnv
-import config
-
 
 def train():
-    os.makedirs(config.MODELS_DIR, exist_ok=True)
-    os.makedirs(config.LOGS_DIR, exist_ok=True)
+    log_dir = "./logs"
+    os.makedirs(log_dir, exist_ok=True)
 
-    env = SpaceInvadersEnv()
+    # 1. Среда без рендера
+    env = SpaceInvadersEnv(render_mode=None)
 
-    # Модель PPO, заточенная под обучение на максимизацию награды
+    # 2. Передаем tensorboard_log напрямую
     model = PPO(
         "MlpPolicy",
         env,
-        verbose=1,
-        learning_rate=0.0003,
-        tensorboard_log=config.LOGS_DIR
+        verbose=1,  # Поставим 1, чтобы в консоли хотя бы писало прогресс шагов
+        tensorboard_log=log_dir
     )
 
-    # Сохраняем чеклисты каждые 10 000 шагов
-    checkpoint_callback = CheckpointCallback(
-        save_freq=10000,
-        save_path=config.MODELS_DIR,
-        name_prefix="ppo_space_invaders"
-    )
+    print("🚀 Старт обучения. Терминал должен быть ЧИСТЫМ от графики игры!")
+    model.learn(total_timesteps=500000)
 
-    print("Запуск процесса обучения...")
-    model.learn(total_timesteps=100000, callback=checkpoint_callback)
-
-    model.save(os.path.join(config.MODELS_DIR, "ppo_space_invaders_final"))
-    print("Обучение завершено. Модель сохранена в models/")
-
+    model.save("./models/ppo_space_invaders_final")
+    env.close()
 
 if __name__ == "__main__":
     train()

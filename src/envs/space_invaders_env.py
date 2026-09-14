@@ -7,8 +7,9 @@ import config
 
 
 class SpaceInvadersEnv(gym.Env):
-    def __init__(self):
+    def __init__(self, render_mode=None):
         super().__init__()
+        self.render_mode = render_mode
 
         # 4 действия: Влево, Вправо, Выстрел, Простой
         self.action_space = spaces.Discrete(4)
@@ -31,43 +32,53 @@ class SpaceInvadersEnv(gym.Env):
             self.process.terminate()
             self.process.wait()
 
+        # Заглушка для графика: если рендер выключен, глушим stdout бинарника C++
+        stdout_dest = None if self.render_mode == "human" else subprocess.DEVNULL
+
         self.process = subprocess.Popen(
             config.WSL_COMMAND,
             stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=stdout_dest,  # <-- DEVNULL уберёт весь вывод C++ из терминала!
+            stderr=subprocess.DEVNULL,
             text=True,
             bufsize=1
         )
 
-        time.sleep(0.2)
-        self.current_score = 0
-
-        obs = self._get_observation()
-        return obs, {}
+        time.sleep(0.1)
+        return self._get_observation(), {}
 
     def step(self, action):
+        # 1. Проверяем, не умер ли C++ подпроцесс
         if self.process.poll() is not None:
-            return np.zeros((config.GRID_HEIGHT, config.GRID_WIDTH), dtype=np.uint8), 0.0, True, False, {}
+            # Если процесс завершился, делаем перезапуск (reset)
+            print("⚠️ C++ процесс неожиданно завершился. Перезапуск среды...")
+            self.reset()
+            return self.current_obs, -100.0, True, False, {"score": self.current_score}
 
-        # 1. Отправляем действие в C++ через stdin
-        self.process.stdin.write(f"{action}\n")
-        self.process.stdin.flush()
+        # 2. Безопасная запись в stdin
+        try:
+            self.process.stdin.write(f"{action}\n")
+            self.process.stdin.flush()
+        except (BrokenPipeError, OSError):
+            print("⚠️ Ошибка записи в pipe (процесс C++ упал).")
+            self.reset()
+            return self.current_obs, -100.0, True, False, {"score": self.current_score}
 
-        # 2. Получаем обновленные данные из stdout
-        obs = self._get_observation()
+        # 3. Чтение нового состояния из C++
+        # (Убедитесь, что тут не зависает чтение, если C++ выдал EOF)
+        self.current_obs = self._get_observation()
         new_score, terminated = self._read_game_status()
 
-        # 3. Награда за получение очков (Максимизация счета)
-        score_diff = new_score - self.current_score
+        reward = float(new_score - self.current_score)
         self.current_score = new_score
 
-        # За выбитые очки даём положительный Reward, за смерть — штраф
-        reward = float(score_diff)
         if terminated:
-            reward -= 100.0  # Штраф за законченную попытку
+            reward -= 100.0
 
-        return obs, reward, terminated, False, {"score": self.current_score}
+        if self.render_mode == "human":
+            self.render()
+
+        return self.current_obs, reward, terminated, False, {"score": self.current_score}
 
     def _get_observation(self):
         # Ожидается, что C++ программа выводит матрицу (например, 20 строк)

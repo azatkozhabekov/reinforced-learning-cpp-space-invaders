@@ -1,33 +1,34 @@
-import os
 import time
 from stable_baselines3 import PPO
 from src.envs.space_invaders_env import SpaceInvadersEnv
-import config
 
 
-def test_best_model():
-    model_path = os.path.join(config.MODELS_DIR, "ppo_space_invaders_final")
+def evaluate():
+    # 1. Создаем среду С ВКЛЮЧЕННЫМ визуальным режимом
+    env = SpaceInvadersEnv(render_mode="human")
 
-    if not os.path.exists(model_path + ".zip"):
-        print("Обученная модель не найдена! Сначала запустите train.py")
-        return
+    # 2. Загружаем сохранённую модель из файла .zip
+    model_path = "./models/ppo_space_invaders_final.zip"
+    print(f"📂 Загрузка обученной модели из {model_path}...")
+    model = PPO.load(model_path, env=env)
 
-    env = SpaceInvadersEnv()
-    model = PPO.load(model_path)
-
+    # 3. Смотрим на работу умного агента
     obs, _ = env.reset()
     done = False
-    total_score = 0
+    total_reward = 0
 
-    print("Запуск демонстрационного прогона...")
+    print("👾 Запуск тестовой игры!")
     while not done:
-        action, _ = model.predict(obs, deterministic=True)
-        obs, reward, done, _, info = env.step(action)
-        total_score = info.get("score", 0)
-        time.sleep(0.05)  # Задержка для визуального контроля в терминале
+        # deterministic=True заставляет модель выбирать НАИЛУЧШЕЕ выученное действие
+        action, _states = model.predict(obs, deterministic=True)
+        obs, reward, terminated, truncated, info = env.step(action)
 
-    print(f"Попытка завершена! Итоговый счёт: {total_score}")
+        total_reward += reward
+        done = terminated or truncated
+
+    print(f"🎮 Игра окончена! Финальный счёт: {info.get('score', 0)}")
+    env.close()
 
 
 if __name__ == "__main__":
-    test_best_model()
+    evaluate()
