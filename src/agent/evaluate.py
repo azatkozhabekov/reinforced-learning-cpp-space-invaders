@@ -4,30 +4,33 @@ from src.envs.space_invaders_env import SpaceInvadersEnv
 
 
 def evaluate():
-    # 1. Создаем среду С ВКЛЮЧЕННЫМ визуальным режимом
-    env = SpaceInvadersEnv(render_mode="human")
+    model_path = "./models/ppo_space_invaders_final"
 
-    # 2. Загружаем сохранённую модель из файла .zip
-    model_path = "./models/ppo_space_invaders_final.zip"
-    print(f"📂 Загрузка обученной модели из {model_path}...")
+    print(f"📂 Загрузка обученной модели из {model_path}.zip...")
+
+    # 1. Инициализируем среду с визуальным режимом "human"
+    env = SpaceInvadersEnv(render_mode="human")
     model = PPO.load(model_path, env=env)
 
-    # 3. Смотрим на работу умного агента
+    print("👾 Запуск тестовой игры! Нажмите Ctrl+C для выхода.")
+
     obs, _ = env.reset()
-    done = False
-    total_reward = 0
+    try:
+        while True:
+            # Модель выбирает детерминированное (лучшее) действие
+            action, _ = model.predict(obs, deterministic=True)
+            obs, reward, terminated, truncated, info = env.step(action)
 
-    print("👾 Запуск тестовой игры!")
-    while not done:
-        # deterministic=True заставляет модель выбирать НАИЛУЧШЕЕ выученное действие
-        action, _states = model.predict(obs, deterministic=True)
-        obs, reward, terminated, truncated, info = env.step(action)
+            # Регулировка FPS во время просмотра (20 FPS = 0.05 сек задержки)
+            time.sleep(0.05)
 
-        total_reward += reward
-        done = terminated or truncated
-
-    print(f"🎮 Игра окончена! Финальный счёт: {info.get('score', 0)}")
-    env.close()
+            if terminated or truncated:
+                print("🎮 Игра окончена! Перезапуск...")
+                obs, _ = env.reset()
+    except KeyboardInterrupt:
+        print("\n👋 Просмотр завершён.")
+    finally:
+        env.close()
 
 
 if __name__ == "__main__":

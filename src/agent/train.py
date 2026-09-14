@@ -2,26 +2,34 @@ import os
 from stable_baselines3 import PPO
 from src.envs.space_invaders_env import SpaceInvadersEnv
 
-def train():
-    log_dir = "./logs"
-    os.makedirs(log_dir, exist_ok=True)
 
-    # 1. Среда без рендера
+def train():
     env = SpaceInvadersEnv(render_mode=None)
 
-    # 2. Передаем tensorboard_log напрямую
     model = PPO(
         "MlpPolicy",
         env,
-        verbose=1,  # Поставим 1, чтобы в консоли хотя бы писало прогресс шагов
-        tensorboard_log=log_dir
+        ent_coef=0.01,  # Принуждает модель пробовать разные действия и не застревать
+        learning_rate=3e-4,
+        verbose=1,
+        tensorboard_log="./logs"
     )
 
-    print("🚀 Старт обучения. Терминал должен быть ЧИСТЫМ от графики игры!")
-    model.learn(total_timesteps=500000)
+    print("🚀 Старт обучения. Нажми Ctrl+C в любой момент, чтобы сохранить модель.")
 
-    model.save("./models/ppo_space_invaders_final")
+    try:
+        model.learn(total_timesteps=1000000)
+    except KeyboardInterrupt:
+        print("\n⚠️ Обучение прервано вручную!")
+
+    # Этот блок сработает ВСЕГДА (и при завершении, и при Ctrl+C)
+    os.makedirs("./models", exist_ok=True)
+    save_path = "./models/ppo_space_invaders_final"
+    model.save(save_path)
+
+    print(f"✅ Модель успешно сохранена в {save_path}.zip!")
     env.close()
+
 
 if __name__ == "__main__":
     train()

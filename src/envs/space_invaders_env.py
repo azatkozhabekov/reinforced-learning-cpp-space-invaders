@@ -10,6 +10,8 @@ class SpaceInvadersEnv(gym.Env):
     def __init__(self, render_mode=None):
         super().__init__()
         self.render_mode = render_mode
+        self.current_step = 0
+        self.max_steps = 2000
 
         # 4 действия: Влево, Вправо, Выстрел, Простой
         self.action_space = spaces.Discrete(4)
@@ -25,60 +27,95 @@ class SpaceInvadersEnv(gym.Env):
         self.process = None
         self.current_score = 0
 
+    def render(self):
+        # Если render_mode == "human", C++ процесс сам пишет ASCII-кадр в stdout.
+        # Метод render() нужен Gymnasium, чтобы не бросать NotImplementedError.
+        if self.render_mode == "human":
+            # Можно добавить задержку, чтобы игра в консоли не "летала" слишком быстро при просмотре
+            time.sleep(0.05)
+        else:
+            pass
+
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
+        self.current_step = 0
 
-        if self.process is not None:
-            self.process.terminate()
-            self.process.wait()
+        if hasattr(self, 'process') and self.process is not None:
+            try:
+                if self.process.stdin:
+                    self.process.stdin.close()
+                if self.process.stdout:
+                    self.process.stdout.close()
+                self.process.terminate()
+                self.process.wait(timeout=0.2)
+            except Exception:
+                pass
 
-        # Заглушка для графика: если рендер выключен, глушим stdout бинарника C++
+        # Если human — выводим в консоль (None), если обучем — глушим в DEVNULL
         stdout_dest = None if self.render_mode == "human" else subprocess.DEVNULL
 
         self.process = subprocess.Popen(
             config.WSL_COMMAND,
             stdin=subprocess.PIPE,
-            stdout=stdout_dest,  # <-- DEVNULL уберёт весь вывод C++ из терминала!
+            stdout=stdout_dest,
             stderr=subprocess.DEVNULL,
             text=True,
             bufsize=1
         )
 
-        time.sleep(0.1)
+        time.sleep(0.05)
         return self._get_observation(), {}
 
     def step(self, action):
-        # 1. Проверяем, не умер ли C++ подпроцесс
-        if self.process.poll() is not None:
-            # Если процесс завершился, делаем перезапуск (reset)
-            print("⚠️ C++ процесс неожиданно завершился. Перезапуск среды...")
-            self.reset()
-            return self.current_obs, -100.0, True, False, {"score": self.current_score}
-
-        # 2. Безопасная запись в stdin
+        # 1. Отправляем действие в C++ процесс
+        self.current_step += 1
         try:
             self.process.stdin.write(f"{action}\n")
             self.process.stdin.flush()
         except (BrokenPipeError, OSError):
-            print("⚠️ Ошибка записи в pipe (процесс C++ упал).")
             self.reset()
-            return self.current_obs, -100.0, True, False, {"score": self.current_score}
+            return self.current_obs, -10.0, True, False, {"score": self.current_score}
 
-        # 3. Чтение нового состояния из C++
-        # (Убедитесь, что тут не зависает чтение, если C++ выдал EOF)
+        # 2. Получаем текущие данные из C++
         self.current_obs = self._get_observation()
         new_score, terminated = self._read_game_status()
 
-        reward = float(new_score - self.current_score)
-        self.current_score = new_score
+        # -----------------------------------------------------------
+        # 3. НАСТРОЙКА НАГРАД (REWARD SHAPING)
+        # -----------------------------------------------------------
+        reward = 0.0
 
+        # А) Основная награда: за увеличение счета в игре (сбитый пришелец)
+        score_diff = new_score - self.current_score
+        if score_diff > 0:
+            reward += score_diff * 50.0  # Умножаем на 10 для сильного стимула!
+
+        # Б) Награда за выживание (Штраф за простой / Маленький бонус за шаг)
+        # Помогает агенту не стоять на месте и быстрее двигаться
+        reward -= 0.01
+
+        # В) Штраф за выстрел впустую (если в action_space выстрел = действие 3)
+        # Это отучит агента спамить стрельбой без остановки
+        if action == 3:  # укажите номер действия стрельбы в вашей игре
+            reward -= 100
+
+        # Г) Жесткий штраф за поражение/смерть
         if terminated:
-            reward -= 100.0
+            reward -= 50.0
 
+        # Обновляем текущий счет для следующего шага
+        self.current_score = new_score
+        # -----------------------------------------------------------
+
+        # Рендер только если включен режим "human"
         if self.render_mode == "human":
             self.render()
 
-        return self.current_obs, reward, terminated, False, {"score": self.current_score}
+        truncated = False
+        if self.current_step >= self.max_steps:
+            truncated = True
+
+        return self.current_obs, reward, terminated, truncated, {"score": self.current_score}
 
     def _get_observation(self):
         # Ожидается, что C++ программа выводит матрицу (например, 20 строк)
