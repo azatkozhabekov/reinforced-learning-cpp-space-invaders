@@ -6,12 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="58724f3b-fb76-4441-86b4-cf8ee3cdbccd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/ppo_space_invaders_10000_steps.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/ppo_space_invaders_20000_steps.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/ppo_space_invaders_30000_steps.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/ppo_space_invaders_40000_steps.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/ppo_space_invaders_final.zip" beforeDir="false" afterPath="$PROJECT_DIR$/models/ppo_space_invaders_final.zip" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/agent/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/agent/evaluate.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/agent/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/agent/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/game.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/render.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/envs/space_invaders_env.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/envs/space_invaders_env.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -29,6 +30,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/PyCharm2025.2/python_stubs/847728032/time.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$APPLICATION_HOME_DIR$/plugins/python-ce/helpers/typeshed/stdlib/subprocess.pyi" root0="SKIP_INSPECTION" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -37,21 +42,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.main.executor": "Run",
-    "Python.space_invaders_env.executor": "Run",
-    "Python.train.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/Азат/Desktop/reinforced-learning-cpp-space-invaders/src/envs",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.space_invaders_env.executor&quot;: &quot;Run&quot;,
+    &quot;Python.train.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Азат/Desktop/reinforced-learning-cpp-space-invaders/src/envs&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Азат\Desktop\reinforced-learning-cpp-space-invaders\src\envs" />

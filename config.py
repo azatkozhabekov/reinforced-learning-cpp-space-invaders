@@ -12,7 +12,7 @@ ACTIONS = {
     0: "LEFT",
     1: "RIGHT",
     2: "SHOOT",
-    3: "IDLE"
+    3: "IDLE",
 }
 
 # Команда запуска C++ игры в WSL
