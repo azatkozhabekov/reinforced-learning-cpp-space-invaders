@@ -10,9 +10,6 @@
       <change beforePath="$PROJECT_DIR$/models/ppo_space_invaders_final.zip" beforeDir="false" afterPath="$PROJECT_DIR$/models/ppo_space_invaders_final.zip" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/agent/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/agent/evaluate.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/agent/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/agent/train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/game.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/render.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/envs/space_invaders_env.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/envs/space_invaders_env.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -54,7 +51,7 @@
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/Азат/Desktop/reinforced-learning-cpp-space-invaders/src/envs&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.sourceCode.Shell Script&quot;
   }
 }</component>
   <component name="RecentsManager">
