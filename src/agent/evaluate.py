@@ -1,8 +1,9 @@
+import sys
+
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
 
 from src.envs.space_invaders_env import SpaceInvadersEnv
-
 
 def make_env():
     def _init():
@@ -10,9 +11,8 @@ def make_env():
 
     return _init
 
-
 def evaluate():
-    model_path = "./models/ppo_space_invaders_final"
+    model_path = sys.argv[1] if len(sys.argv) > 1 else "./models/ppo_space_invaders_final"
 
     print(f"Loading trained model from {model_path}.zip...")
 

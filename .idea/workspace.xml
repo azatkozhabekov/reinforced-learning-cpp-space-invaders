@@ -6,11 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="58724f3b-fb76-4441-86b4-cf8ee3cdbccd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/ppo_space_invaders_final.zip" beforeDir="false" afterPath="$PROJECT_DIR$/models/ppo_space_invaders_final.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/agent/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/agent/evaluate.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/agent/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/agent/train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/envs/space_invaders_env.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/envs/space_invaders_env.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,6 +26,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/PyCharm2025.2/python_stubs/847728032/builtins.py" root0="SKIP_INSPECTION" />
     <setting file="file://$USER_HOME$/AppData/Local/JetBrains/PyCharm2025.2/python_stubs/847728032/time.py" root0="SKIP_INSPECTION" />
     <setting file="file://$APPLICATION_HOME_DIR$/plugins/python-ce/helpers/typeshed/stdlib/subprocess.pyi" root0="SKIP_INSPECTION" />
   </component>
